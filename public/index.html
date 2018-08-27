@@ -1,9 +1,51 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Erm hey.</title>
-  </head>
-  <body>
+    <script type="text/javascript" src="lib/jquery-3.3.1.min.js"></script>
+    <script>
+        // if user is running mozilla then use it's built-in WebSocket
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
+        var connection = new WebSocket('ws://ec2-34-218-247-117.us-west-2.compute.amazonaws.com:1337');
+        connection.onopen = function() {
+            // connection is opened and ready to use
+            $.ajax({
+                url: "/getRequest",
+                type: "GET",
+                dataType: "text",
+                success: function(response, status, http) {
+                    if (response) {
+                        document.getElementById("notification").innerText = "Receive Response: " + response;
+                    }
+                }
+            });
+	connection.send("Client request");
+        };
+        connection.onerror = function(error) {
+            // an error occurred when sending/receiving data
+        };
+        connection.onmessage = function(message) {
+            // try to decode json (I assume that each message
+            // from server is json)
+            try {
+                var json = JSON.parse(message.data);
+            } catch (e) {
+                console.log('This doesn\'t look like a valid JSON: ',
+                    message.data);
+                return;
+            }
+            // handle incoming message
+	    document.getElementById("websocketMsg").innerHTML = document.getElementById("websocketMsg").innerHTML + "<br>" + message.data;
+        };
+	
+    </script>
+</head>
+
+<body>
     <img src="https://media.giphy.com/media/3o6Zt7aSSZLX6U5WtW/source.gif">
-  </body>
+    <div id="notification"></div>
+    <div id="websocketMsg">Websocket communication: </div>
+</body>
+
 </html>
