@@ -1,96 +1,14 @@
-$.ajax({
-        url: "/requestWebsocket",
-        type: "POST",
-		data: {port: window.location.pathname === "/notifications.html" ? 1338 : 1337},
-        success: function(response, status, http) {
-            console.log('success');
-        }
-    });
 $(document).ready(function() {
-	// Open a connection
-window.socket = new WebSocket('ws://ec2-34-218-247-117.us-west-2.compute.amazonaws.com:1337');
-
-// When a connection is made
-socket.onopen = function() {
-  /*console.log('Opened connection ');
-
-  // send data to the server
-  var json = JSON.stringify({ message: 'Hello ' });
-  socket.send(json);*/
-  socket.send(JSON.stringify({
-        'type': 'success',
-        'component': 'websocket',
-        'msg': 'Websocket is connected'
-    }));
-}
-
-// When data is received
-socket.onmessage = function(message) {
-  try {
-            var json = JSON.parse(message.data);
-        } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ',
-                message.data);
-            return;
-        }
-        // handle incoming message
-        //document.getElementById("websocketMsg").innerHTML = document.getElementById("websocketMsg").innerHTML + "<br>" + message.data;
-
-        if (json.component && json.component === "websocket") {
-            webSocketConnectedFlag = true;
-            binding.createAndShowNotification(json.type || 'info', binding.handleMsg(json), 'top', 'right');
-        }
-        if (json.component && json.component === "device") {
-            var sDeviceName = json.device;
-            angular.element($("#pocketSurancecontent")).scope().$apply(function($scope) {
-                $scope.device[sDeviceName] = json.value;
-            });
-        }
-        if (json.component && json.component === "notification") {
-            binding.createAndShowNotification(json.type || 'info', binding.handleMsg(json), 'top', 'right');
-        }
-        if (json.component && json.component === "confirmation") {
-            document.getElementById("confirmationTitle").innerText = json.category + " Confirmation" || "Confirmation";
-            document.getElementById("confirmationBody").innerText = binding.handleMsg(json) || "Confirmation";
-            binding.handleModalColor(json.type);
-            $('#myModal').appendTo("body").modal('show');
-        }
-}
-
-// A connection could not be made
-socket.onerror = function(event) {
-  console.log(event);
-}
-
-// A connection was closed
-socket.onclose = function(code, reason) {
-	socket.close();
-  console.log(code, reason);
-}
-
-// Close the connection when the window is closed
-window.addEventListener('beforeunload', function() {
-  socket.close();
-});
-/*    var iPort = window.location.pathname === "/notifications.html" ? 1338 : 1337
+    
     window.WebSocket = window.WebSocket || window.MozWebSocket;
     window.webSocketConnectedFlag = false;
-    //window.webSocketConnection = new WebSocket('ws://ec2-34-218-247-117.us-west-2.compute.amazonaws.com:'+ iPort.toString());
     window.webSocketConnection = new WebSocket('ws://ec2-34-218-247-117.us-west-2.compute.amazonaws.com:1337');
-	webSocketConnection.onopen = function() {
+    webSocketConnection.onopen = function() {
         // connection is opened and ready to use
         //connection.send("Client request");
-    };
-	webSocketConnection.onclose  = function() {
-        // connection is opened and ready to use
-        //connection.send("Client request");
-		console.log("close connection");
     };
 
     webSocketConnection.onerror = function(error) {};
-	window.addEventListener('beforeunload', function() {
-		window.webSocketConnection.close();
-	});
     webSocketConnection.onmessage = function(message) {
         try {
             var json = JSON.parse(message.data);
@@ -122,7 +40,7 @@ window.addEventListener('beforeunload', function() {
             $('#myModal').appendTo("body").modal('show');
         }
     };
-*/
+
 });
 window.appPocketSurance = angular.module('pocketSurance', []);
 appPocketSurance.controller('dashboardCtrl', function($scope) {
@@ -157,12 +75,7 @@ appPocketSurance.controller('dashboardCtrl', function($scope) {
 
     $scope.requestWebsocket = function(sComponent, sType, sData) {
         if (webSocketConnectedFlag) {
-            /*webSocketConnection.send(JSON.stringify({
-                type: sType || 'info',
-                component: sComponent,
-                msg: sData || 'Client request - ' + Date.now().toString()
-            }));*/
-			socket.send(JSON.stringify({
+            webSocketConnection.send(JSON.stringify({
                 type: sType || 'info',
                 component: sComponent,
                 msg: sData || 'Client request - ' + Date.now().toString()
