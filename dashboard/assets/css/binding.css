@@ -7,6 +7,9 @@
 	-moz-box-shadow: none;
 	box-shadow: none;
 }
+.click_device:hover{
+	color: red;
+}
 .modal-header-success {
     color:#fff;
     padding:9px 15px;
